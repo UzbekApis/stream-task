@@ -1,0 +1,8 @@
+userbot.session
+userbot.session*
+*.session
+*.session-journal
+.env
+login_qr.png
+__pycache__/
+*.pyc

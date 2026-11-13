@@ -1,0 +1,6 @@
+requests
+telethon
+python-dotenv
+qrcode
+pillow
+urllib3
