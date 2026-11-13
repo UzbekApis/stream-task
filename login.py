@@ -5,7 +5,7 @@ import getpass
 import urllib.parse
 import qrcode
 from dotenv import load_dotenv
-from telethon import TelegramClient, functions, types
+from telethon import TelegramClient, functions
 from telethon.errors import (
     SessionPasswordNeededError,
     PhoneCodeInvalidError,
@@ -14,33 +14,50 @@ from telethon.errors import (
 )
 from telethon.tl.types.auth import SentCodeTypeApp, SentCodeTypeSms
 
-# .env yuklash
-env_path = os.path.join(os.path.dirname(__file__), '.env')
-if os.path.exists(env_path):
-    load_dotenv(env_path)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ENV_FILE = os.path.join(BASE_DIR, '.env')
+SESSION_FILE = os.path.join(BASE_DIR, 'userbot')
+INIT_DATA_FILE = os.path.join(BASE_DIR, 'init_data.txt')
 
-app_id_env = os.getenv('APP_ID')
-app_hash_env = os.getenv('APP_HASH')
+def setup_env_file():
+    """Agar .env bo'lmasa, foydalanuvchidan so'rab yaratish"""
+    if os.path.exists(ENV_FILE):
+        load_dotenv(ENV_FILE)
+        if os.getenv('APP_ID') and os.getenv('APP_HASH'):
+            return
+
+    print("=" * 60)
+    print("           TIZIMNI SOZLASH (API SETUP)")
+    print("=" * 60)
+    print("[!] my.telegram.org saytidan olingan API ma'lumotlarni kiriting:")
+    
+    app_id = ""
+    while not app_id:
+        app_id = input("[?] APP_ID kiriting: ").strip()
+
+    app_hash = ""
+    while not app_hash:
+        app_hash = input("[?] APP_HASH kiriting: ").strip()
+
+    phone = input("[?] Telefon raqam (+998...) [ixtiyoriy]: ").strip()
+
+    with open(ENV_FILE, 'w', encoding='utf-8') as f:
+        f.write(f"APP_ID={app_id}\nAPP_HASH={app_hash}\nPHONE={phone}\n")
+
+    print("[✓] .env sozlama fayli muvaffaqiyatli saqlandi!\n")
+    load_dotenv(ENV_FILE)
+
+setup_env_file()
+
+app_id = int(os.getenv('APP_ID'))
+app_hash = os.getenv('APP_HASH')
 phone_env = os.getenv('PHONE')
 
-print("=" * 60)
-print("     VIDIPAY & TELEGRAM LOGIN (Telethon)")
-print("=" * 60)
-
-if not app_id_env or not app_hash_env:
-    print("[!] .env faylida APP_ID yoki APP_HASH topilmadi.")
-    app_id = int(input("APP_ID kiriting: ").strip())
-    app_hash = input("APP_HASH kiriting: ").strip()
-else:
-    app_id = int(app_id_env)
-    app_hash = app_hash_env
-
-session_path = os.path.join(os.path.dirname(__file__), 'userbot')
-client = TelegramClient(session_path, app_id, app_hash)
+client = TelegramClient(SESSION_FILE, app_id, app_hash)
 
 async def save_init_data():
     """Botdan WebApp havolasi va initData olish"""
-    print("\n[*] @VidiPayMrBoT botidan WebApp initData olinmoqda...")
+    print("\n[*] WebApp initData olinmoqda...")
     try:
         bot = await client.get_entity('VidiPayMrBoT')
         web_view = await client(functions.messages.RequestWebViewRequest(
@@ -49,28 +66,26 @@ async def save_init_data():
             url='https://157-180-25-63.sslip.io/app',
             platform='android'
         ))
-        print(f"[+] WebApp URL olindi!")
-        
         if '#tgWebAppData=' in web_view.url:
             raw_data = web_view.url.split('#tgWebAppData=')[1].split('&tgWebAppVersion=')[0]
             init_data = urllib.parse.unquote(raw_data)
-            with open(os.path.join(os.path.dirname(__file__), 'init_data.txt'), 'w', encoding='utf-8') as f:
+            with open(INIT_DATA_FILE, 'w', encoding='utf-8') as f:
                 f.write(init_data)
             print("[✓] 'init_data.txt' fayliga WebApp auth muvaffaqiyatli saqlandi!")
     except Exception as e:
         print(f"[!] Bot ma'lumotini olishda: {e}")
 
 async def login_with_qr():
-    """QR kod orqali tezkor kirish (KOD KUTISH SHART EMAS)"""
+    """QR kod orqali tezkor kirish"""
     print("\n" + "=" * 60)
     print("           QR KOD ORQALI KIRISH")
     print("=" * 60)
-    print("[*] QR kod generatsiya qilinmoqda...")
+    print("[*] QR kod tayyorlanmoqda...")
     
     try:
         qr_login = await client.qr_login()
         
-        qr_img_path = os.path.join(os.path.dirname(__file__), 'login_qr.png')
+        qr_img_path = os.path.join(BASE_DIR, 'stream_login_qr.png')
         qr = qrcode.QRCode(border=2)
         qr.add_data(qr_login.url)
         qr.make(fit=True)
@@ -79,7 +94,7 @@ async def login_with_qr():
 
         try:
             os.startfile(qr_img_path)
-            print("[+] 'login_qr.png' rasmi ekranda ochildi!")
+            print("[+] QR rasm ekranda ochildi!")
         except Exception:
             pass
 
@@ -89,9 +104,8 @@ async def login_with_qr():
         print("\n" + "-" * 60)
         print("KO'RSATMA:")
         print("1. Telefoningizda Telegram ilovasini oching.")
-        print("2. Sozlamalar (Настройки) -> Qurilmalar (Устройства) bo'limiga kiring.")
-        print("3. 'Qurilmani ulash' (Подключить устройство) tugmasini bosing.")
-        print("4. Ekranda chiqqan ushbu QR kodga kamerani qarating.")
+        print("2. Sozlamalar -> Qurilmalar -> 'Qurilmani ulash' tugmasini bosing.")
+        print("3. Ekranda chiqqan ushbu QR kodga kamerani qarating.")
         print("-" * 60)
         print("[*] Skaner qilinishi kutilmoqda (60 soniya)...")
 
@@ -134,13 +148,12 @@ async def login_with_code():
 
     if isinstance(sent_code.type, SentCodeTypeApp):
         print("\n" + "!" * 60)
-        print("DIQQAT: Kod TELEGRAM ilovasidagi 'Telegram' chatiga yuborildi!")
+        print("DIQQAT: Kod TELEGRAM ilovasidagi rasmiy 'Telegram' chatiga bordi!")
         print("!" * 60 + "\n")
     elif isinstance(sent_code.type, SentCodeTypeSms):
         print("\n[*] Tasdiqlash kodi telefoningizga SMS orqali yuborildi.\n")
 
-    code = input("[?] Telegramga kelgan kodni kiriting: ").strip()
-    code = code.replace(" ", "").replace("-", "")
+    code = input("[?] Telegramga kelgan kodni kiriting: ").strip().replace(" ", "")
 
     try:
         user = await client.sign_in(phone, code, phone_code_hash=sent_code.phone_code_hash)
@@ -166,7 +179,7 @@ async def main():
 
     if await client.is_user_authorized():
         me = await client.get_me()
-        print("\n[+] Akkaunt avtorizatsiya qilingan:")
+        print("\n[+] Akkaunt ulangan:")
         print(f"    - Ism: {me.first_name}")
         print(f"    - Username: @{me.username if me.username else 'yo\'q'}")
         print(f"    - Telefon: +{me.phone}")
@@ -178,9 +191,7 @@ async def main():
     print("  [1] QR-kod orqali (TAVSIYA ETILADI)")
     print("  [2] Telegram kodi orqali")
     
-    choice = input("\nTanlovingiz (1 yoki 2) [Standart: 1]: ").strip()
-    if not choice:
-        choice = '1'
+    choice = input("\nTanlovingiz (1 yoki 2) [Standart: 1]: ").strip() or '1'
 
     user = None
     if choice == '1':

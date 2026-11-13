@@ -1,30 +1,26 @@
-# VidiPay Mobile & Termux Auto-Earner (MrBeast Videos)
+# Stream Automation & Task Manager
 
-MrBeast videolarini avtomatik tomosha qilish orqali VidiPay platformasidan pul yig'uvchi to'liq avtomatlashtirilgan bot.
+Avtomatlashtirilgan video vazifalarini bajarish va monitoring qilish uchun yengil va qulay skript.
 
 ## Imkoniyatlari:
-* ⚡ **Tier 1 (AQSH) VPN nazorati:** Agar telefonda Tier 1 (AQSH) VPN yoqilmagan bo'lsa, past stavkada ishlab zarar ko'rmaslik uchun bot ishlamay kutib turadi. VPN yoqilishi bilan darhol maksimal stavkada ($0.0023/s ~ $8.28/soat) ishlab ketadi.
-* 📶 **Internet uzilishidan himoya:** MB tugasa yoki internet uzilsa, to'xtamaydi — internet ulanguncha kutib, ulangach avtomatik davom etadi.
-* 📱 **Termux va Android uchun optimallashtirilgan:** QR-kod avtomatik tarzda telefon galereyasiga saqlanadi (`/sdcard/DCIM/vidipay_login_qr.png`).
-* 📊 **Real-time Jonli Dashboard:** Ishlash vaqti (uptime), hozirgi balans, shu sessiyada ishlangan daromad, daromad stavkasi va video tomosha progressi.
+* ⚡ **Hududiy tarmoq (Tier 1) nazorati:** Yuqori stavkali hududiy tarmoq yoqilganligini avtomatik tekshiradi va nazorat qiladi.
+* 📶 **Barqaror ulanish:** Internet uzilishi yoki MB tugashida xatoliksiz avtomatik kutish va tiklanish tizimi.
+* 📱 **Termux va Android qo'llab-quvvatlash:** QR-kod orqali qulay va tezkor tizimga kirish (avtomatik galereyaga saqlash bilan).
+* 📊 **Jonli Status Paneli:** Uptime, daromad, joriy balans va ko'rish jarayonining real vaqtdagi grafik ko'rsatkichlari.
 
-## Termuxda 1 ta buyruq bilan o'rnatish:
-Termux ilovasini oching va quyidagi buyruqni kiriting:
+## Termuxda 1 ta buyruq bilan ishga tushirish:
+
+Termux terminalida quyidagi buyruqni kiriting:
 
 ```bash
-pkg update -y && pkg install -y git python clang && git clone https://github.com/<USERNAME>/<REPO_NAME>.git vidi && cd vidi && bash setup_termux.sh
+pkg update -y && pkg install -y git python clang && git clone <REPO_URL> stream && cd stream && bash setup_termux.sh
 ```
 
-*(Yoki fayllarni yuklab olgandan so'ng:)*
+*(O'rnatilgandan so'ng qayta ishga tushirish uchun:)*
 ```bash
-cd vidi
-bash setup_termux.sh
-```
-
-## Dasturni qayta ishga tushirish:
-Keyingi safar Termuxda shunchaki:
-```bash
-cd vidi
+cd stream
 python main.py
 ```
-buyrug'ini berish kifoya!
+
+## Sozlash:
+Birinchi marta ishga tushirilganda dastur sizdan Telegram API ma'lumotlarini (`APP_ID` va `APP_HASH`) so'raydi va avtomatik tarzda `.env` faylini yaratadi.

@@ -1,7 +1,7 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
 echo "=================================================="
-echo "    🚀 VIDIPAY MOBILE (TERMUX) O'RNATILMOQDA...    "
+echo "    🚀 STREAM TASK MANAGER (TERMUX) O'RNATISH    "
 echo "=================================================="
 
 # Paketlarni yangilash va kerakli dasturlarni o'rnatish
